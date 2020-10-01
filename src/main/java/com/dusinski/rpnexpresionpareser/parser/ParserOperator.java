@@ -3,9 +3,25 @@ package com.dusinski.rpnexpresionpareser.parser;
 public class ParserOperator implements ParserElement<String> {
 
     private final String operatorValue;
+    private final int operatorPriority;
 
     ParserOperator(String input) {
         this.operatorValue = input;
+
+        switch (input) {
+            case "+":
+            case "-":
+            case ")":
+                this.operatorPriority=1;
+                break;
+            case "*":
+            case "/":
+                this.operatorPriority=2;
+                break;
+            default:
+                this.operatorPriority = 0; //"("
+                break;
+        }
     }
 
 
@@ -41,5 +57,9 @@ public class ParserOperator implements ParserElement<String> {
     @Override
     public String toString() {
         return operatorValue;
+    }
+
+    public int getOperatorPriority() {
+        return this.operatorPriority;
     }
 }

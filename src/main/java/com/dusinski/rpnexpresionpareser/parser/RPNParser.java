@@ -16,7 +16,6 @@ public class RPNParser {
     }
 
 
-
     public String getResult() {
         return this.outputStack.toString();
     }
@@ -36,8 +35,7 @@ public class RPNParser {
                 inputStack.add(new ParserNumber(str));
         }
     }
-
-
+    
     public void findResult() {
         this.outputStack = new Stack<>();
 
@@ -52,7 +50,7 @@ public class RPNParser {
                 //System.out.println(secondParserElement + ((ParserOperator) element).getElement() + firstParserElement);
             }
         }
-    System.out.println("Result: "+this.outputStack.toString());
+        System.out.println("Result: " + this.outputStack.toString());
     }
 
     public void findConventionalNote() {
@@ -67,10 +65,46 @@ public class RPNParser {
                 this.outputStack.push(conventionalNote);
             }
         }
-        System.out.println("Conventional Note: "+this.outputStack.toString());
+        System.out.println("Conventional Note: " + this.outputStack.toString());
     }
 
+
+    public void convConventionalToRPN() {
+        Stack<ParserElement> tempStack = new Stack<>();
+
+        for (ParserElement element : this.inputStack) {
+            if (element.getClass() == ParserNumber.class){
+                this.outputStack.push(element);
+            }
+            else if (element.toString().equals("(")){
+                tempStack.push(element);
+            }
+            else  if (element.toString().equals(")")){
+                while(!tempStack.peek().toString().equals("(")){
+                    this.outputStack.push(tempStack.pop());
+                }
+                tempStack.pop();
+            }
+            else if (tempStack.empty() ||   ((ParserOperator)element).getOperatorPriority()>((ParserOperator)tempStack.peek()).getOperatorPriority()){
+                tempStack.push(element);
+            }
+            else {
+                this.outputStack.push(tempStack.pop());
+                tempStack.push(element);
+            }
+        }
+
+        int tempStackSize=tempStack.size();
+        for (int i=0; i<tempStackSize;i++)
+        {
+            this.outputStack.push(tempStack.pop());
+        }
+        System.out.println("RPN Note: " + this.outputStack.toString());
+    }
+
+
     private boolean isOperator(String input) {
-        return (input.equals("+") || input.equals("-") || input.equals("*") || input.equals("/"));
+        return (input.equals("+") || input.equals("-") || input.equals("*") || input.equals("/") ||
+                input.equals("(") || input.equals(")"));
     }
 }
