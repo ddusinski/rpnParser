@@ -2,7 +2,7 @@ package com.dusinski.rpnexpresionpareser;
 
 import com.dusinski.rpnexpresionpareser.parser.RPNParser;
 
-import java.util.Arrays;
+
 
 public class Application {
 
@@ -12,7 +12,8 @@ public class Application {
         String rpnInputString="12 2 3 4 * 10 5 / + * +";
 
         RPNParser rpn = new RPNParser(rpnInputString);
-        System.out.println(rpn.getConventionalNote());
+        rpn.findConventionalNote();
+        rpn.findResult();
 
 //        System.out.println("Hello world: "+ Arrays.stream(args).findFirst());
 
