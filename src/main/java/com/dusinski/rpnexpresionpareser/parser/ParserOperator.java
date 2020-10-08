@@ -56,7 +56,7 @@ public class ParserOperator implements ParserElement<String> {
 
     @Override
     public String toString() {
-        return operatorValue;
+        return this.operatorValue;
     }
 
     public int getOperatorPriority() {

@@ -1,95 +1,104 @@
 package com.dusinski.rpnexpresionpareser.parser;
-
-import javax.xml.transform.Result;
 import java.util.Stack;
 
 public class RPNParser {
 
-    private final Stack<ParserElement> inputStack;
-    private Stack<Object> outputStack;
-
-
-    public RPNParser(String rpnInput) {
-        this.inputStack = new Stack<>();
-        this.outputStack = new Stack<>();
-        createInputStack(rpnInput);
-    }
-
-
-    public String getResult() {
-        return this.outputStack.toString();
-    }
 
     public boolean isInputCorrect(String input) {
         return false;
     }
 
-    private void createInputStack(String input) {
+    private Stack<ParserElement> createInputStack(String input) {
+
+        Stack<ParserElement> inputStack = new Stack<>();
 
         String[] arr = input.split(" ");
 
         for (String str : arr) {
+
             if (isOperator(str)) {
                 inputStack.add(new ParserOperator(str));
             } else
                 inputStack.add(new ParserNumber(str));
         }
+        return inputStack;
     }
-    
-    public void findResult() {
-        this.outputStack = new Stack<>();
 
-        for (ParserElement element : this.inputStack) {
+    private String findResult(String inputRPNnote) {
+        Stack<ParserElement> inputResultStack =  createInputStack(inputRPNnote);
+        Stack<Object> outputResultStack = new Stack<>();
+
+        for (ParserElement element : inputResultStack) {
             if (element.getClass() == ParserNumber.class) {
-                this.outputStack.push(((ParserNumber) element).getElement());
+                outputResultStack.push(((ParserNumber) element).getElement());
             } else {
-                Integer firstParserElement = (Integer) this.outputStack.pop();
-                Integer secondParserElement = (Integer) this.outputStack.pop();
-                this.outputStack.push(
+                Integer firstParserElement = (Integer) outputResultStack.pop();
+                Integer secondParserElement = (Integer) outputResultStack.pop();
+                outputResultStack.push(
                         ((ParserOperator) element).compute(secondParserElement, firstParserElement));
-                //System.out.println(secondParserElement + ((ParserOperator) element).getElement() + firstParserElement);
-            }
+                       }
         }
-        System.out.println("Result: " + this.outputStack.toString());
+        return outputResultStack.toString();
     }
 
-    public void findConventionalNote() {
-        String conventionalNote;
-        for (ParserElement element : this.inputStack) {
+    public String findRPNResult(String inputRPNnote){
+        return findResult(inputRPNnote);
+    }
+
+    public String findCONResult(String inputCONnote){
+        return findResult(findRPNNote(inputCONnote));
+    }
+
+    public String findConventionalNote(String inputRPNnote) {
+        Stack<ParserElement> inputStackRPN =  createInputStack(inputRPNnote);
+        Stack<String> outputStackCON = new Stack<>();
+        String conventionalNote="";
+
+        for (ParserElement element : inputStackRPN) {
             if (element.getClass() == ParserNumber.class) {
-                this.outputStack.push(((ParserNumber) element).getElement().toString());
+                outputStackCON.push(((ParserNumber) element).getElement().toString());
             } else {
-                String firstParserElement = (String) this.outputStack.pop();
-                String secondParserElement = (String) this.outputStack.pop();
-                conventionalNote = "(" + secondParserElement + ((ParserOperator) element).getElement() + firstParserElement + ")";
-                this.outputStack.push(conventionalNote);
+                String firstParserElement = (String) outputStackCON.pop();
+                String secondParserElement = (String) outputStackCON.pop();
+                conventionalNote = "( " + secondParserElement +" "+ ((ParserOperator) element).getElement()+" " + firstParserElement + " )";
+                outputStackCON.push(conventionalNote);
             }
         }
-        System.out.println("Conventional Note: " + this.outputStack.toString());
+        return conventionalNote;
     }
 
+    private String printResult(Stack<String> outputString){
+        String result="";
 
-    public void convConventionalToRPN() {
+        for (String str :outputString){
+            result=result+str+" ";
+        }
+        return result;
+    }
+
+    public String findRPNNote(String inputCON) {
+        Stack<ParserElement> inputStackCON =  createInputStack(inputCON);
         Stack<ParserElement> tempStack = new Stack<>();
+        Stack<String> outputStackRPN = new Stack<>();
 
-        for (ParserElement element : this.inputStack) {
+        for (ParserElement element : inputStackCON) {
             if (element.getClass() == ParserNumber.class){
-                this.outputStack.push(element);
+                outputStackRPN.push(element.toString());
             }
             else if (element.toString().equals("(")){
                 tempStack.push(element);
             }
             else  if (element.toString().equals(")")){
                 while(!tempStack.peek().toString().equals("(")){
-                    this.outputStack.push(tempStack.pop());
+                    outputStackRPN.push(tempStack.pop().toString());
                 }
                 tempStack.pop();
             }
-            else if (tempStack.empty() ||   ((ParserOperator)element).getOperatorPriority()>((ParserOperator)tempStack.peek()).getOperatorPriority()){
+            else if (tempStack.empty()||((ParserOperator)element).getOperatorPriority()>((ParserOperator)tempStack.peek()).getOperatorPriority()){
                 tempStack.push(element);
             }
             else {
-                this.outputStack.push(tempStack.pop());
+                outputStackRPN.push(tempStack.pop().toString());
                 tempStack.push(element);
             }
         }
@@ -97,11 +106,10 @@ public class RPNParser {
         int tempStackSize=tempStack.size();
         for (int i=0; i<tempStackSize;i++)
         {
-            this.outputStack.push(tempStack.pop());
+            outputStackRPN.push(tempStack.pop().toString());
         }
-        System.out.println("RPN Note: " + this.outputStack.toString());
+        return printResult(outputStackRPN);
     }
-
 
     private boolean isOperator(String input) {
         return (input.equals("+") || input.equals("-") || input.equals("*") || input.equals("/") ||
